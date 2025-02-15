@@ -54,3 +54,17 @@ def user_login(request):
             "userId": user.id
             }, status=200)
     return Response({"message": "Invalid credentials!"}, status=400)
+
+
+"""
+Logs user out of session
+Args:
+    HTTP request + AUTH
+Returns:
+    200 => {token}
+"""
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def user_logout(request):
+    request.user.auth_token.delete()
+    return Response({"message": "User logged out!"}, status=200)
