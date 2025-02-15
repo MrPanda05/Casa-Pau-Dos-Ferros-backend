@@ -34,3 +34,23 @@ def user_register(request):
         serializer.save()
         return Response({"message": "User registered!"}, status=201)
     return Response(serializer.errors, status=400)
+
+
+"""
+Logs user 
+Args:
+    HTTP request
+Returns:
+    200 => {token, username}
+    400 => {message}
+"""
+@api_view(["POST"])
+def user_login(request):
+    user = authenticate(email=request.data["email"], password=request.data["password"])
+    if user is not None:
+        token, _ = Token.objects.get_or_create(user=user)
+        return Response({
+            "token": token.key,
+            "userId": user.id
+            }, status=200)
+    return Response({"message": "Invalid credentials!"}, status=400)
