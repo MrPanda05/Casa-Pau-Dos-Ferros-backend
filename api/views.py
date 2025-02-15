@@ -3,8 +3,9 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAuthenticated
-from .serializer import UserSerializer
-from .models import user as le_user
+from django.shortcuts import get_object_or_404
+from .serializer import *
+from .models import User
 
 """
 Test
@@ -46,7 +47,12 @@ Returns:
 """
 @api_view(["POST"])
 def user_login(request):
-    user = authenticate(email=request.data["email"], password=request.data["password"])
+    login = request.data["login"]
+    if "@" in login:
+        userEmail = get_object_or_404(User, email=login)
+        user = authenticate(username=userEmail.username, password=request.data["password"])
+    else:
+        user = authenticate(username=login, password=request.data["password"])
     if user is not None:
         token, _ = Token.objects.get_or_create(user=user)
         return Response({
@@ -68,3 +74,15 @@ Returns:
 def user_logout(request):
     request.user.auth_token.delete()
     return Response({"message": "User logged out!"}, status=200)
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def user_add_address(request):
+    user = User.objects.get(username=request.user)
+    data = {"user_id": user.id, "cep": request.data["cep"], "state": request.data["state"], "city": request.data["city"], "street": request.data["street"], "number": request.data["number"], "complement": request.data["complement"]}
+    serializer = AddressSerializer(data=data)
+    if(serializer.is_valid()):
+        serializer.save()
+        return Response({"message": "Address set!"}, status=200)
+    return Response(serializer.errors, status=400)

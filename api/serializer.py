@@ -1,15 +1,25 @@
-import django.contrib.auth.models
 from rest_framework import serializers
-from .models import user as le_user
-
+from .models import User, user_address
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
-        model = le_user
-        fields = ['username', 'email', 'password', 'date', 'cpf']
+        model = User
+        fields = ['username', 'email', 'password', 'full_name', 'birth_date', 'cpf']
         extra_kwargs = {
             'password': {'write_only': True}
         }
 
     def create(self, validated_data):
-        user = le_user.objects.create_user(**validated_data)
+        user = User.objects.create_user(**validated_data)
         return user
+
+class AddressSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = user_address
+        fields = ['address_id', 'user_id', 'cep', 'state', 'city', 'street', 'number', 'complement']
+        extra_kwargs = {
+            'address_id': {'read_only': True}
+        }
+
+    def create(self, validated_data):
+        address = user_address.objects.create(**validated_data)
+        return address
