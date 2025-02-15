@@ -80,7 +80,7 @@ def user_logout(request):
 @permission_classes([IsAuthenticated])
 def user_add_address(request):
     user = User.objects.get(username=request.user)
-    data = {"user_id": user.id, "cep": request.data["cep"], "country": request.data["country"], "state": request.data["state"], "city": request.data["city"], "neighborhood": request.data["neighborhood"], "street": request.data["street"], "number": request.data["number"], "complement": request.data["complement"]}
+    data = {"user_id": user.id, "cep": request.data["cep"], "state": request.data["state"], "city": request.data["city"], "street": request.data["street"], "number": request.data["number"], "complement": request.data["complement"]}
     serializer = AddressSerializer(data=data)
     if(serializer.is_valid()):
         serializer.save()
