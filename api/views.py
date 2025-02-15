@@ -84,5 +84,5 @@ def user_add_address(request):
     serializer = AddressSerializer(data=data)
     if(serializer.is_valid()):
         serializer.save()
-        return Response({"message": "Address not set!"}, status=200)
+        return Response({"message": "Address set!"}, status=200)
     return Response(serializer.errors, status=400)
