@@ -2,7 +2,7 @@ from django.contrib.auth import authenticate
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.authtoken.models import Token
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from django.shortcuts import get_object_or_404
 from .serializer import *
 from .models import User
@@ -85,4 +85,15 @@ def user_add_address(request):
     if(serializer.is_valid()):
         serializer.save()
         return Response({"message": "Address set!"}, status=200)
+    return Response(serializer.errors, status=400)
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+@permission_classes([IsAdminUser])
+def staff_register(request):
+    serializer = StaffUserSerializer(data=request.data)
+    if(serializer.is_valid()):
+        serializer.save()
+        return Response({"message": "Staff user registered!"}, status=201)
     return Response(serializer.errors, status=400)
