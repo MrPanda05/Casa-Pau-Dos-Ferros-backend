@@ -31,10 +31,12 @@ class AddressSerializer(serializers.ModelSerializer):
         model = user_address
         fields = ['address_id', 'user_id', 'cep', 'state', 'city', 'street', 'number', 'complement']
         extra_kwargs = {
-            'address_id': {'read_only': True}
+            'address_id': {'read_only': True},
+            'user_id': {'read_only': True}
         }
 
     def create(self, validated_data):
+        validated_data['user_id'] = self.context['request'].user
         address = user_address.objects.create(**validated_data)
         return address
     

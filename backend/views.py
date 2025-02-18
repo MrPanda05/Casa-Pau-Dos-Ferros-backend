@@ -10,19 +10,11 @@ from api.serializer import *
 class AddressViewSet(viewsets.ModelViewSet):
     queryset = user_address.objects.all()
     serializer_class = AddressSerializer
-    permission_classes = [IsAuthenticated, IsAdminUser]
-
-    def get_permissions(self):
-        if(self.action == 'list'):
-            permission_classes = [IsAdminUser&IsAuthenticated]
-        else:
-            permission_classes = [IsAuthenticated]
-        return [permission() for permission in permission_classes]
+    permission_classes = [IsAuthenticated]
 
     def list(self, request):
-        queryset = user_address.objects.all()
-        address = get_list_or_404(queryset)
-        serializer = AddressSerializer(address, many=True)
+        queryset = get_list_or_404(user_address, user_id=request.user.id)
+        serializer = AddressSerializer(queryset, many=True)
         return Response(serializer.data)
     
     def retrieve(self, request, pk=None):
@@ -33,6 +25,7 @@ class AddressViewSet(viewsets.ModelViewSet):
     
     def create(self, request):
         serializer = AddressSerializer(data=request.data)
+        serializer.context['request'] = request
         if(serializer.is_valid()):
             serializer.save()
             return Response({"message": "Address registered!"}, status=201)

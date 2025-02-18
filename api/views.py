@@ -80,9 +80,8 @@ def user_logout(request):
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def user_add_address(request):
-    user = User.objects.get(username=request.user)
-    data = {"user_id": user.id, "cep": request.data["cep"], "state": request.data["state"], "city": request.data["city"], "street": request.data["street"], "number": request.data["number"], "complement": request.data["complement"]}
-    serializer = AddressSerializer(data=data)
+    serializer = AddressSerializer(data=request.data)
+    serializer.context['request'] = request
     if(serializer.is_valid()):
         serializer.save()
         return Response({"message": "Address set!"}, status=200)
