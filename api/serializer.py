@@ -3,12 +3,26 @@ from .models import User, user_address
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['username', 'email', 'password', 'full_name', 'birth_date', 'cpf']
+        fields = ['username', 'email', 'password', 'full_name', 'birth_date', 'cpf', 'id']
         extra_kwargs = {
             'password': {'write_only': True}
         }
 
     def create(self, validated_data):
+        user = User.objects.create_user(**validated_data)
+        return user
+
+class StaffUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'password', 'full_name', 'cpf', 'is_staff', 'id']
+        extra_kwargs = {
+            'password': {'write_only': True},
+            'is_staff': {'read_only': True}
+        }
+
+    def create(self, validated_data):
+        validated_data['is_staff'] = True
         user = User.objects.create_user(**validated_data)
         return user
 
@@ -23,3 +37,4 @@ class AddressSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         address = user_address.objects.create(**validated_data)
         return address
+    

@@ -33,6 +33,12 @@ class AddressViewSet(viewsets.ModelViewSet):
 
 
 class UserViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all()
+    queryset = User.objects.filter(is_staff=False)
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+
+class StaffViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.filter(is_staff=True)
+    serializer_class = StaffUserSerializer
+    permission_classes = [permissions.IsAuthenticated, permissions.IsAdminUser]
