@@ -57,7 +57,8 @@ def user_login(request):
         token, _ = Token.objects.get_or_create(user=user)
         return Response({
             "token": token.key,
-            "userId": user.id
+            "userId": user.id,
+            "email": login,
             }, status=200)
     return Response({"message": "Invalid credentials!"}, status=400)
 
@@ -89,11 +90,57 @@ def user_add_address(request):
 
 
 @api_view(["POST"])
-@permission_classes([IsAuthenticated])
-@permission_classes([IsAdminUser])
+@permission_classes([IsAuthenticated&IsAdminUser])
 def staff_register(request):
     serializer = StaffUserSerializer(data=request.data)
     if(serializer.is_valid()):
         serializer.save()
         return Response({"message": "Staff user registered!"}, status=201)
     return Response(serializer.errors, status=400)
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated&IsAdminUser])
+def staff_Get(request):
+    usermail = request.data["email"]
+    UserAdmin = User.objects.filter(email=usermail).first()
+    if(UserAdmin is None):
+        return Response({"message": "User does not exist"}, status=400)
+    isAdmin = UserAdmin.is_staff
+    if(isAdmin):
+        return Response({"message": "User is staff"}, status=200)
+    else:
+        return Response({"message": "User is not staff"}, status=200)
+    
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated&IsAdminUser])
+def staff_Update(request):
+    usermail = request.data["email"]
+    UserAdmin = User.objects.filter(email=usermail).first()
+    if(UserAdmin is None):
+        return Response({"message": "User does not exist"}, status=400)
+    isAdmin = UserAdmin.is_staff
+    if(isAdmin):
+        return Response({"message": "already admin"}, status=200)
+    else:
+        UserAdmin.is_staff = True
+        UserAdmin.save()
+        return Response({"message": "is now admin"}, status=200)
+    
+
+    
+@api_view(["POST"])
+@permission_classes([IsAuthenticated&IsAdminUser])
+def staff_Delete(request):
+    usermail = request.data["email"]
+    UserAdmin = User.objects.filter(email=usermail).first()
+    if(UserAdmin is None):
+        return Response({"message": "User does not exist"}, status=400)
+    isAdmin = UserAdmin.is_staff
+    if(not isAdmin):
+        return Response({"message": "already not admin"}, status=200)
+    else:
+        UserAdmin.is_staff = False
+        UserAdmin.save()
+        return Response({"message": "is now a peasent"}, status=200)

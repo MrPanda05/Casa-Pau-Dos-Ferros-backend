@@ -8,5 +8,8 @@ urlpatterns = [
     path("logout/", user_logout),
     path("address/", user_add_address),
     path("staff/", staff_register),
+    path("staff/get", staff_Get),
+    path("staff/update", staff_Update),
+    path("staff/delete", staff_Delete),
     #path("image/", user_image_update)
 ]
