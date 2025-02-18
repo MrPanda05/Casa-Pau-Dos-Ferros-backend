@@ -16,7 +16,7 @@ class user_address(models.Model):
     state = models.CharField(max_length=50)
     city = models.CharField(max_length=50)
     street = models.CharField(max_length=80)
-    number = models.CharField(max_length=4)
+    number = models.CharField(max_length=8)
     complement = models.CharField(max_length=80, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
