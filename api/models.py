@@ -17,7 +17,7 @@ class user_address(models.Model):
     city = models.CharField(max_length=50)
     street = models.CharField(max_length=80)
     number = models.CharField(max_length=8)
-    complement = models.CharField(max_length=80, null=True)
+    complement = models.CharField(max_length=80, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     user_id = models.ForeignKey(User, models.CASCADE, db_column='user_id', null=True, default=0)

@@ -12,6 +12,13 @@ class AddressViewSet(viewsets.ModelViewSet):
     serializer_class = AddressSerializer
     permission_classes = [IsAuthenticated, IsAdminUser]
 
+    def get_permissions(self):
+        if(self.action == 'list'):
+            permission_classes = [IsAdminUser&IsAuthenticated]
+        else:
+            permission_classes = [IsAuthenticated]
+        return [permission() for permission in permission_classes]
+
     def list(self, request):
         queryset = user_address.objects.all()
         address = get_list_or_404(queryset)
