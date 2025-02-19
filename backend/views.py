@@ -53,7 +53,6 @@ class StaffViewSet(viewsets.ModelViewSet):
 class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
-    permission_classes = [IsAuthenticated&IsAdminUser]
     pagination_class = ProductPagination
 
     def get_base64_image(self, obj):
