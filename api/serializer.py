@@ -1,5 +1,7 @@
+import base64
+from django.core.files import File
 from rest_framework import serializers
-from .models import User, user_address
+from .models import *
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -40,3 +42,14 @@ class AddressSerializer(serializers.ModelSerializer):
         address = user_address.objects.create(**validated_data)
         return address
     
+class ProductSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = ['product_id', 'name', 'description', 'price', 'amount', 'image']
+        extra_kwargs = {
+            'product_id': {'read_only': True},
+        }
+
+    def create(self, validated_data):
+        product = Product.objects.create(**validated_data)
+        return product

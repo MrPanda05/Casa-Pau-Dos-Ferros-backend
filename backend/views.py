@@ -1,12 +1,11 @@
 from rest_framework import viewsets, permissions
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
-from rest_framework.decorators import permission_classes
 from rest_framework.response import Response
 from django.shortcuts import get_list_or_404, get_object_or_404
 
 from api.models import *
 from api.serializer import *
-from .pagination import StandardPagination
+from .pagination import *
 
 class AddressViewSet(viewsets.ModelViewSet):
     queryset = user_address.objects.all()
@@ -50,3 +49,27 @@ class StaffViewSet(viewsets.ModelViewSet):
     serializer_class = StaffUserSerializer
     permission_classes = [permissions.IsAuthenticated, permissions.IsAdminUser]
     pagination_class = StandardPagination
+
+class ProductViewSet(viewsets.ModelViewSet):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+    permission_classes = [IsAuthenticated&IsAdminUser]
+    pagination_class = ProductPagination
+
+    def get_base64_image(self, obj):
+        f = open(obj.image.path, 'rb')
+        image = File(f)
+        data = base64.b64encode(image.read())
+        f.close()
+        return data
+
+    def list(self, request):
+        queryset = Product.objects.all()
+        pagination_class = ProductPagination()
+        page = pagination_class.paginate_queryset(queryset, request)
+        if page is not None:
+            serializer = ProductSerializer(page, many=True)
+            for product in serializer.data:
+                product['base64_image'] = self.get_base64_image(Product.objects.get(product_id=product['product_id']))
+            return pagination_class.get_paginated_response(serializer.data)
+        return 
