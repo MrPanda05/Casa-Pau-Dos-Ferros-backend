@@ -50,7 +50,12 @@ class ProductSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'product_id': {'read_only': True},
         }
-    
+    def get_base64_image(self, obj):
+        if obj.image:
+            with open(obj.image.path, 'rb') as image_file:
+                return base64.b64encode(image_file.read()).decode('utf-8')
+        return None
+
     def create(self, validated_data):
         product = Product.objects.create(**validated_data)
         return product
