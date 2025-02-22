@@ -72,14 +72,14 @@ class CategorySerializer(serializers.ModelSerializer):
         category = Category.objects.create(**validated_data)
         return category
     
-# class ProductCategorySerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = ProductCategory
-#         fields = ['id', 'category', 'product']
-#         extra_kwargs = {
-#             'id': {'read_only': True},
-#         }
+class ProductCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductCategory
+        fields = ['id', 'category', 'product']
+        extra_kwargs = {
+            'id': {'read_only': True},
+        }
     
-#     def create(self, validated_data):
-#         product_category = ProductCategory.objects.create(**validated_data)
-#         return product_category
+    def create(self, validated_data):
+        product_category = ProductCategory.objects.create(**validated_data)
+        return product_category
