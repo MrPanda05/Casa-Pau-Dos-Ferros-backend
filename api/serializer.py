@@ -55,7 +55,31 @@ class ProductSerializer(serializers.ModelSerializer):
             with open(obj.image.path, 'rb') as image_file:
                 return base64.b64encode(image_file.read()).decode('utf-8')
         return None
-    
+
     def create(self, validated_data):
         product = Product.objects.create(**validated_data)
         return product
+    
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = ['category_id', 'name', 'description']
+        extra_kwargs = {
+            'category_id': {'read_only': True},
+        }
+    
+    def create(self, validated_data):
+        category = Category.objects.create(**validated_data)
+        return category
+    
+# class ProductCategorySerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = ProductCategory
+#         fields = ['id', 'category', 'product']
+#         extra_kwargs = {
+#             'id': {'read_only': True},
+#         }
+    
+#     def create(self, validated_data):
+#         product_category = ProductCategory.objects.create(**validated_data)
+#         return product_category

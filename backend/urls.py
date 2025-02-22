@@ -15,6 +15,8 @@ router.register(r'address', AddressViewSet, basename='address')
 router.register(r'users', UserViewSet)
 router.register(r'staff', StaffViewSet, basename='staff')
 router.register(r'product', ProductViewSet)
+router.register(r'category', CategoryViewSet)
+# router.register(r'product_category', ProductCategoryViewSet)
 
 
 urlpatterns = [
