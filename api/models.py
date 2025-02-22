@@ -68,13 +68,13 @@ class Category(models.Model):
     def __str__(self):
         return self.name
 
-# class ProductCategory(models.Model):
-#     id = models.AutoField(primary_key=True)
-#     category = models.ForeignKey(Category, models.CASCADE, db_column='category_id', default=1)
-#     product = models.ForeignKey(Product, models.CASCADE, db_column='product_id', default=1)
+class ProductCategory(models.Model):
+    id = models.AutoField(primary_key=True)
+    category = models.ForeignKey(Category, models.CASCADE, db_column='category_id', default=1)
+    product = models.ForeignKey(Product, models.CASCADE, db_column='product_id', default=1)
 
-#     class Meta:
-#         unique_together = ('category', 'product')
+    class Meta:
+        unique_together = ('category', 'product')
 
-#     def __str__(self):
-#         return self.id
+    def __str__(self):
+        return self.id
