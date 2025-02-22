@@ -44,7 +44,7 @@ class Product(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.product_id
+        return self.name
     
 @receiver(post_save, sender=Product)
 def rename_image_filename(sender, instance, created, **kwargs):
@@ -57,3 +57,24 @@ def rename_image_filename(sender, instance, created, **kwargs):
             # If file name has changed, save with the new name
             instance.image.name = new_filename
             instance.save()  # Trigger re-save with new filename
+
+class Category(models.Model):
+    category_id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=100, null=False)
+    description = models.TextField(null=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.name
+
+# class ProductCategory(models.Model):
+#     id = models.AutoField(primary_key=True)
+#     category = models.ForeignKey(Category, models.CASCADE, db_column='category_id', default=1)
+#     product = models.ForeignKey(Product, models.CASCADE, db_column='product_id', default=1)
+
+#     class Meta:
+#         unique_together = ('category', 'product')
+
+#     def __str__(self):
+#         return self.id
