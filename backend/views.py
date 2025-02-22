@@ -99,3 +99,42 @@ class ProductViewSet(viewsets.ModelViewSet):
     
     def partial_update(self, request, *args, **kwargs):
         return super().partial_update(request, *args, **kwargs)
+
+class CategoryViewSet(viewsets.ModelViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    pagination_class = StandardPagination
+
+    def list(self, request):
+        queryset = Category.objects.all()
+        pagination_class = StandardPagination()
+        page = pagination_class.paginate_queryset(queryset, request)
+        if page is not None:
+            serializer = CategorySerializer(page, many=True)
+            return pagination_class.get_paginated_response(serializer.data)
+        return Response('No categories registered', status=404)
+
+    def retrieve(self, request, pk=None):
+        category = get_object_or_404(Category, category_id=pk)
+        serializer = CategorySerializer(category)
+        return Response(serializer.data)
+    
+    def create(self, request):
+        serializer = CategorySerializer(data=request.data)
+        if(serializer.is_valid()):
+            serializer.save()
+            return Response({"message": "Category registered!"}, status=201)
+        
+# class ProductCategoryViewSet(viewsets.ModelViewSet):
+#     queryset = ProductCategory.objects.all()
+#     serializer_class = ProductCategorySerializer
+#     pagination_class = StandardPagination
+
+#     def list(self, request):
+#         queryset = ProductCategory.objects.all()
+#         pagination_class = StandardPagination()
+#         page = pagination_class.paginate_queryset(queryset, request)
+#         if page is not None:
+#             serializer = ProductCategorySerializer(page, many=True)
+#             return pagination_class.get_paginated_response(serializer.data)
+#         return Response('No product categories registered', status=404)
