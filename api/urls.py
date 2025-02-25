@@ -11,5 +11,6 @@ urlpatterns = [
     path("staff/get", staff_Get),
     path("staff/update", staff_Update),
     path("staff/delete", staff_Delete),
+    path("product/<int:category>", productByCategory),
     #path("image/", user_image_update)
 ]
