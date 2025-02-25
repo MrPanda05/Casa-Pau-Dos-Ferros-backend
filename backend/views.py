@@ -206,6 +206,7 @@ class CartItemViewSet(viewsets.ModelViewSet):
         cart = get_object_or_404(Cart, user_id=request.user.id, is_active=True)
         cart_item = get_object_or_404(CartItem, id=pk)
         product = get_object_or_404(Product, product_id=cart_item.product.product_id)
+        aux_product = None
         if request.data['product'] not in (None, '') and request.data['product'] != cart_item.product.product_id:
             aux_product = get_object_or_404(Product, product_id=request.data['product'])
             #validate if product is already in the cart
@@ -235,7 +236,7 @@ class CartItemViewSet(viewsets.ModelViewSet):
         if(serializer.is_valid()):
             serializer.save()
             product.save()
-            if(aux_product != None):
+            if(aux_product is not None):
                 aux_product.save()
             return Response({"message": "Product updated in the cart " + str(cart.cart_id) + " !"}, status=200)
         return Response(serializer.errors, status=400)
