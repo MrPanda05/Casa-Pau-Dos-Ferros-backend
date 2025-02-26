@@ -117,7 +117,7 @@ class CartItemSerializer(serializers.ModelSerializer):
 class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
-        fields = ['order_id', 'cart', 'user_address', 'total', 'status']
+        fields = ['order_id', 'cart', 'user_address', 'payment_method', 'total', 'status']
         extra_kwargs = {
             'order_id': {'read_only': True},
             'cart': {'read_only': True},

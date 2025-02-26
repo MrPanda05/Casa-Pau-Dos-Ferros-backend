@@ -85,7 +85,7 @@ def user_add_address(request):
     serializer.context['request'] = request
     if(serializer.is_valid()):
         serializer.save()
-        return Response({"message": "Endereço salvo com sucesso"}, status=200)
+        return Response({"message": "Endereço salvo com sucesso"}, status=201)
     return Response(serializer.errors, status=400)
 
 

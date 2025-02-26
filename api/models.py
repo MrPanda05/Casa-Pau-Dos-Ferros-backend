@@ -121,6 +121,7 @@ class Order(models.Model):
 
     order_id = models.AutoField(primary_key=True)
     cart = models.ForeignKey(Cart, models.CASCADE, db_column='cart_id')
+    payment_method = models.CharField(max_length=50, default='')
     user_address = models.ForeignKey(user_address, models.CASCADE, db_column='address_id')
     status = models.IntegerField(choices=Status.choices, default=Status.Pending)
     total = models.DecimalField(max_digits=10, decimal_places=2, null=False)
