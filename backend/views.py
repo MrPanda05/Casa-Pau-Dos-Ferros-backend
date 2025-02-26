@@ -29,7 +29,7 @@ class AddressViewSet(viewsets.ModelViewSet):
         if page is not None:
             serializer = AddressSerializer(page, many=True)
             return pagination_class.get_paginated_response(serializer.data)
-        return Response('No addresses registered', status=404)
+        return Response({"message": "nenhum endereço registrado"}, status=404)
     
     def retrieve(self, request, pk=None):
         address = get_object_or_404(user_address, user_id=request.user.id, address_id=pk)
@@ -42,7 +42,7 @@ class AddressViewSet(viewsets.ModelViewSet):
         serializer.context['request'] = request
         if(serializer.is_valid()):
             serializer.save()
-            return Response({"message": "Address registered!"}, status=201)
+            return Response({"message": "endereço registrado"}, status=201)
         return Response(serializer.errors, status=400)
 
 
@@ -77,7 +77,7 @@ class ProductViewSet(viewsets.ModelViewSet):
         if page is not None:
             serializer = ProductSerializer(page, many=True)
             return pagination_class.get_paginated_response(serializer.data)
-        return Response('No products registered', status=404)
+        return Response({"message": "nenhum produto registrado"}, status=404)
 
     def retrieve(self, request, pk=None):
         product = get_object_or_404(Product, product_id=pk)
@@ -92,7 +92,7 @@ class ProductViewSet(viewsets.ModelViewSet):
         serializer = ProductSerializer(data=request.data)
         if(serializer.is_valid()):
             serializer.save()
-            return Response({"message": "Product registered!"}, status=201)
+            return Response({"message": "produto registrado"}, status=201)
         return Response(serializer.errors, status=400)
     
     def update(self, request, *args, **kwargs):
@@ -118,7 +118,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
         if page is not None:
             serializer = CategorySerializer(page, many=True)
             return pagination_class.get_paginated_response(serializer.data)
-        return Response('No categories registered', status=404)
+        return Response({"message": "nenhuma categoria registrada"}, status=404)
 
     def retrieve(self, request, pk=None):
         category = get_object_or_404(Category, category_id=pk)
@@ -129,7 +129,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
         serializer = CategorySerializer(data=request.data)
         if(serializer.is_valid()):
             serializer.save()
-            return Response({"message": "Category registered!"}, status=201)
+            return Response({"message": "categoria registrada"}, status=201)
         
 class ProductCategoryViewSet(viewsets.ModelViewSet):
     queryset = ProductCategory.objects.all()
@@ -143,7 +143,7 @@ class ProductCategoryViewSet(viewsets.ModelViewSet):
         if page is not None:
             serializer = ProductCategorySerializer(page, many=True)
             return pagination_class.get_paginated_response(serializer.data)
-        return Response('No product categories registered', status=404)
+        return Response({"message": "nenhuma categoria de produto registrada"}, status=404)
     
 class CartViewSet(viewsets.ModelViewSet):
     queryset = Cart.objects.all()
@@ -156,7 +156,7 @@ class CartViewSet(viewsets.ModelViewSet):
         cart.is_active = False
         cart.status = Cart.Status.Canceled
         cart.save()
-        return Response({"message": "Cart deactivated!"}, status=200)
+        return Response({"message": "carrinho desativado"}, status=200)
 
 class CartItemViewSet(viewsets.ModelViewSet):
     queryset = CartItem.objects.all()
@@ -172,7 +172,7 @@ class CartItemViewSet(viewsets.ModelViewSet):
         if page is not None:
             serializer = CartItemSerializer(page, many=True)
             return pagination_class.get_paginated_response(serializer.data)
-        return Response('No products in the cart', status=404)
+        return Response({"message": "nenhum produto no carrinho"}, status=404)
 
     def create(self, request):
         #check for active cart
@@ -182,18 +182,18 @@ class CartItemViewSet(viewsets.ModelViewSet):
             #check if product is already in the cart
             cart_item = CartItem.objects.filter(cart_id=cart.cart_id, product_id=product.product_id)
             if cart_item:
-                return Response({"message": "Product already in the cart!"}, status=400)
+                return Response({"message": "produto já está no carrinho"}, status=400)
             #check if product amount is available
             req_amount = Decimal(request.data['quantity'])
             if (product.amount-product.reserved) < req_amount:
-                return Response({"message": "Product amount not available | stock: " + str(product.amount-product.reserved)}, status=400)
+                return Response({"message": "quantidade de produto não disponivel | stock: " + str(product.amount-product.reserved)}, status=400)
             else:
                 product.reserved += req_amount
         serializer = CartItemSerializer(data=request.data, context={'cart': cart})
         if(serializer.is_valid()):
             serializer.save()
             product.save()
-            return Response({"message": "Product added to the cart !"}, status=201)
+            return Response({"message": "produto adcionado ao carrinho"}, status=201)
         return Response(serializer.errors, status=400)
 
     def retrieve(self, request, pk=None):
@@ -213,10 +213,10 @@ class CartItemViewSet(viewsets.ModelViewSet):
             if(aux_product != product):
                 cart_item_aux = CartItem.objects.filter(cart_id=cart.cart_id, product_id=aux_product.product_id)
                 if cart_item_aux:
-                    return Response({"message": "Product already in the cart!"}, status=400)
+                    return Response({"message": "produto já está no carrinho"}, status=400)
             #validate product change
             if((aux_product.amount-aux_product.reserved) < cart_item.quantity):
-                return Response({"message": "Product amount not available | stock: " + str(aux_product.amount-aux_product.reserved)}, status=400)
+                return Response({"message": "quantidade de produto não disponivel | stock: " + str(aux_product.amount-aux_product.reserved)}, status=400)
             else:
                 product.reserved -= cart_item.quantity
                 aux_product.reserved += cart_item.quantity
@@ -229,7 +229,7 @@ class CartItemViewSet(viewsets.ModelViewSet):
                 # validate newer quantity
                 req_amount = Decimal(request.data['quantity'])
                 if (product.amount-product.reserved) < req_amount:
-                    return Response({"message": "Product amount not available | stock: " + str(product.amount-product.reserved)}, status=400)
+                    return Response({"message": "quantidade de produto não disponivel | stock: " + str(product.amount-product.reserved)}, status=400)
                 else:
                     product.reserved += req_amount
         serializer = CartItemSerializer(cart_item, data=request.data)
@@ -238,7 +238,7 @@ class CartItemViewSet(viewsets.ModelViewSet):
             product.save()
             if(aux_product is not None):
                 aux_product.save()
-            return Response({"message": "Product updated in the cart " + str(cart.cart_id) + " !"}, status=200)
+            return Response({"message": "produto atualizado em " + str(cart.cart_id) + " !"}, status=200)
         return Response(serializer.errors, status=400)
 
     def destroy(self, request, pk=None):
@@ -254,5 +254,5 @@ class CartItemViewSet(viewsets.ModelViewSet):
             cart.is_active = False
             cart.status = Cart.Status.Canceled
             cart.save()
-            return Response({"message": "Product removed from the cart " + str(cart.cart_id) + " and cart deactivated!"}, status=200)
-        return Response({"message": "Product removed from the cart " + str(cart.cart_id) + " !"}, status=200)
+            return Response({"message": "produto removido do carrinho " + str(cart.cart_id) + " e carrinho desativado"}, status=200)
+        return Response({"message": "produto removido do carrinho " + str(cart.cart_id) + " !"}, status=200)
