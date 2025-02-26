@@ -158,3 +158,60 @@ def productByCategory(request, category):
         serializer = ProductSerializer(aux, many=True)
         return pagination_class.get_paginated_response(serializer.data)
     return Response('No products found', status=404)
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def confirmCart(request):
+    # Verificar endereço do usuário
+    print("verificando endereço")
+    address = get_object_or_404(user_address, user_id=request.user, address_id=request.data["user_address"])
+    if not address:
+        return Response({"message": "Address not found"}, status=400)
+    print("endereço confirmado")
+    # Atualizar status do carrinho
+    print("atualizando carrinho")
+    cart = get_object_or_404(Cart, user_id=request.user, is_active=True)
+    cart.is_active = False
+    cart.status = Cart.Status.Confirmed
+    print("carrinho atualizado")
+
+    # Criar base do pedido
+    print("criando pedido")
+    order = Order.objects.filter(cart=cart).first()
+    cart_item = CartItem.objects.filter(cart=cart)
+    if order is None:
+        total = 0
+        for item in cart_item:
+            total += item.product.price * item.quantity
+        serializer = OrderSerializer(data=request.data, context={"cart": cart, "total": total})
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=400)
+        serializer.save()
+        order = get_object_or_404(Order, cart=cart)
+    print("pedido criado")
+    # Criar itens do pedido
+    print("criando itens do pedido")
+    items = []
+    for item in cart_item:
+        item_data = dict(order=order.order_id, cart_item=item.id, total=(item.quantity*item.product.price))
+        items.append(item_data)
+    item_serializer = OrderItemSerializer(data=items, many=True)
+    if not item_serializer.is_valid():
+        return Response(item_serializer.errors, status=400)
+    print("itens do pedido criados")
+    #Atualizar quantidades do produto
+    print("atualizando estoque")
+    for item in cart_item:
+        item.product.amount -= item.quantity
+        item.product.reserved -= item.quantity
+    print("estoque atualizado")
+    #Salvar apenas no final
+    print("salvando")
+    order.status = Order.Status.Finished
+    for item in cart_item:
+        item.product.save()
+    item_serializer.save()
+    order.save()
+    cart.save()
+    print("salvo")
+    return Response({"message": "Cart confirmed!"}, status=200)

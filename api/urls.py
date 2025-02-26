@@ -12,5 +12,6 @@ urlpatterns = [
     path("staff/update", staff_Update),
     path("staff/delete", staff_Delete),
     path("product/<int:category>", productByCategory),
+    path("confirm/", confirmCart),
     #path("image/", user_image_update)
 ]
