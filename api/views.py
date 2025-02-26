@@ -215,3 +215,18 @@ def confirmCart(request):
     cart.save()
     print("salvo")
     return Response({"message": "carrinho confirmado!"}, status=200)
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def getProductInCart(request):
+    cart = get_object_or_404(Cart, user_id=request.user, is_active=True)
+    cart_item = CartItem.objects.filter(cart=cart)
+    products = []
+    for item in cart_item:
+        products.append(item.product)
+    serializer = ProductSerializer(products, many=True)
+    data = serializer.data
+    for i in range(len(data)):
+        data[i]["quantity"] = cart_item[i].quantity
+    return Response(data, status=200)
