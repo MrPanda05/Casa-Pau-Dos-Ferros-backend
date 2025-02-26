@@ -26,7 +26,7 @@ class user_address(models.Model):
     user_id = models.ForeignKey(User, models.CASCADE, db_column='user_id', null=True, default=0)
 
     def __str__(self):
-        return self.address_id
+        return str(self.address_id)
 
 def get_upload_to(instance, filename):
     ext = filename.split('.')[-1]
@@ -39,9 +39,11 @@ class Product(models.Model):
     description = models.TextField(null=False)
     price = models.DecimalField(max_digits=10, decimal_places=2, null=False)
     amount = models.DecimalField(max_digits=10, decimal_places=2, null=False, default=0)
+    reserved = models.DecimalField(max_digits=10, decimal_places=2, null=False, default=0)
     image = models.ImageField(upload_to='media/product', null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
 
     def __str__(self):
         return self.name
@@ -77,4 +79,57 @@ class ProductCategory(models.Model):
         unique_together = ('category', 'product')
 
     def __str__(self):
-        return self.id
+        return str(self.id)
+
+
+class Cart(models.Model):
+
+    class Status(models.IntegerChoices):
+        Open = 0
+        Confirmed = 1
+        Canceled = 2
+    
+    cart_id = models.AutoField(primary_key=True)
+    user_id = models.ForeignKey(User, models.CASCADE, db_column='user_id', default=1)
+    is_active = models.BooleanField(default=True)
+    status = models.IntegerField(choices=Status.choices, default=Status.Open)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return str(self.cart_id)
+
+class CartItem(models.Model):
+    cart = models.ForeignKey(Cart, models.CASCADE, db_column='cart_id')
+    product = models.ForeignKey(Product, models.CASCADE, db_column='product_id')
+    quantity = models.IntegerField(blank=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('cart', 'product')
+
+
+    def __str__(self):
+        return str(self.product.product_id)
+    
+# class Order(models.Model):
+#     class Status(models.IntegerChoices):
+#         Pending = 0
+#         Finished = 1
+#         Canceled = 2
+
+#     order_id = models.AutoField(primary_key=True)
+#     cart = models.ForeignKey(Cart, models.CASCADE, db_column='cart_id')
+#     user_address = models.ForeignKey(user_address, models.CASCADE, db_column='address_id')
+#     status = models.IntegerField(choices=Status.choices, default=Status.Pending)
+#     total = models.DecimalField(max_digits=10, decimal_places=2, null=False)
+#     created_at = models.DateTimeField(auto_now_add=True)
+#     updated_at = models.DateTimeField(auto_now=True)
+
+# class OrderItem(models.Model):
+#     order_id = models.ForeignKey(Order, models.CASCADE, db_column='order_id')
+#     cart_item = models.ForeignKey(CartItem, models.CASCADE, db_column='cart_item_id')
+#     total = models.DecimalField(max_digits=10, decimal_places=2, null=False)
+#     created_at = models.DateTimeField(auto_now_add=True)
+#     updated_at = models.DateTimeField(auto_now=True)

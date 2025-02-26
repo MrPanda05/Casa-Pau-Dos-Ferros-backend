@@ -6,6 +6,7 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from django.shortcuts import get_object_or_404
 from .serializer import *
 from .models import User
+from backend.pagination import *
 
 """
 Test
@@ -143,3 +144,17 @@ def staff_Delete(request):
         UserAdmin.is_staff = False
         UserAdmin.save()
         return Response({"message": "is now a peasent"}, status=200)
+
+
+@api_view(["GET"])
+def productByCategory(request, category):
+    queryset = ProductCategory.objects.filter(category=category)
+    pagination_class = ProductPagination()
+    page = pagination_class.paginate_queryset(queryset, request)
+    if page is not None:
+        aux = []
+        for product in page:
+            aux.append(product.product)
+        serializer = ProductSerializer(aux, many=True)
+        return pagination_class.get_paginated_response(serializer.data)
+    return Response('No products found', status=404)

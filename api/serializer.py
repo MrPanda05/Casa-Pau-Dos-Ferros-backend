@@ -83,3 +83,62 @@ class ProductCategorySerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         product_category = ProductCategory.objects.create(**validated_data)
         return product_category
+
+class CartSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Cart
+        fields = ['cart_id', 'user_id', 'is_active']
+        extra_kwargs = {
+            'cart_id': {'read_only': True},
+            'user_id': {'read_only': True},
+            'is_active': {'read_only': True}
+        }
+    
+    def create(self, validated_data):
+        validated_data['user_id'] = self.context['request'].user
+        cart = Cart.objects.create(**validated_data)
+        return cart
+
+class CartItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CartItem
+        fields = ['id', 'cart', 'product', 'quantity']
+        extra_kwargs = {
+            'id': {'read_only': True},
+            'cart': {'read_only': True},
+            'quantity': {'required': True}
+        }
+
+    def create(self, validated_data):
+        validated_data['cart'] = self.context['cart']
+        cart_item = CartItem.objects.create(**validated_data)
+        return cart_item
+    
+# class OrderSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Order
+#         fields = ['order_id', 'cart', 'user_address', 'total', 'status']
+#         extra_kwargs = {
+#             'order_id': {'read_only': True},
+#             'cart': {'read_only': True}
+#         }
+    
+#     def create(self, validated_data):
+#         order = Order.objects.create(**validated_data)
+#         return order
+    
+# class OrderItemSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = OrderItem
+#         fields = ['id', 'order', 'product', 'total']
+#         extra_kwargs = {
+#             'id': {'read_only': True},
+#             'order': {'read_only': True},
+#             'total': {'read_only': True}
+#         }
+
+#     def create(self, validated_data):
+#         validated_data['order'] = self.context['order']
+#         validated_data['total'] = validated_data['product'].price * validated_data['quantity']
+#         order_item = OrderItem.objects.create(**validated_data)
+#         return order_item
