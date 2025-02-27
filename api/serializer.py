@@ -114,31 +114,31 @@ class CartItemSerializer(serializers.ModelSerializer):
         cart_item = CartItem.objects.create(**validated_data)
         return cart_item
     
-# class OrderSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Order
-#         fields = ['order_id', 'cart', 'user_address', 'total', 'status']
-#         extra_kwargs = {
-#             'order_id': {'read_only': True},
-#             'cart': {'read_only': True}
-#         }
+class OrderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Order
+        fields = ['order_id', 'cart', 'user_address', 'payment_method', 'total', 'status']
+        extra_kwargs = {
+            'order_id': {'read_only': True},
+            'cart': {'read_only': True},
+            'total': {'read_only': True},
+            'status': {'read_only': True}
+        }
     
-#     def create(self, validated_data):
-#         order = Order.objects.create(**validated_data)
-#         return order
+    def create(self, validated_data):
+        validated_data['cart'] = self.context['cart']
+        validated_data['total'] = self.context['total']
+        order = Order.objects.create(**validated_data)
+        return order
     
-# class OrderItemSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = OrderItem
-#         fields = ['id', 'order', 'product', 'total']
-#         extra_kwargs = {
-#             'id': {'read_only': True},
-#             'order': {'read_only': True},
-#             'total': {'read_only': True}
-#         }
+class OrderItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OrderItem
+        fields = ['id', 'order', 'cart_item', 'total']
+        extra_kwargs = {
+            'id': {'read_only': True},
+        }
 
-#     def create(self, validated_data):
-#         validated_data['order'] = self.context['order']
-#         validated_data['total'] = validated_data['product'].price * validated_data['quantity']
-#         order_item = OrderItem.objects.create(**validated_data)
-#         return order_item
+    def create(self, validated_data):
+        order_item = OrderItem.objects.create(**validated_data)
+        return order_item

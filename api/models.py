@@ -113,23 +113,24 @@ class CartItem(models.Model):
     def __str__(self):
         return str(self.product.product_id)
     
-# class Order(models.Model):
-#     class Status(models.IntegerChoices):
-#         Pending = 0
-#         Finished = 1
-#         Canceled = 2
+class Order(models.Model):
+    class Status(models.IntegerChoices):
+        Pending = 0
+        Finished = 1
+        Canceled = 2
 
-#     order_id = models.AutoField(primary_key=True)
-#     cart = models.ForeignKey(Cart, models.CASCADE, db_column='cart_id')
-#     user_address = models.ForeignKey(user_address, models.CASCADE, db_column='address_id')
-#     status = models.IntegerField(choices=Status.choices, default=Status.Pending)
-#     total = models.DecimalField(max_digits=10, decimal_places=2, null=False)
-#     created_at = models.DateTimeField(auto_now_add=True)
-#     updated_at = models.DateTimeField(auto_now=True)
+    order_id = models.AutoField(primary_key=True)
+    cart = models.ForeignKey(Cart, models.CASCADE, db_column='cart_id')
+    payment_method = models.CharField(max_length=50, default='')
+    user_address = models.ForeignKey(user_address, models.CASCADE, db_column='address_id')
+    status = models.IntegerField(choices=Status.choices, default=Status.Pending)
+    total = models.DecimalField(max_digits=10, decimal_places=2, null=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
-# class OrderItem(models.Model):
-#     order_id = models.ForeignKey(Order, models.CASCADE, db_column='order_id')
-#     cart_item = models.ForeignKey(CartItem, models.CASCADE, db_column='cart_item_id')
-#     total = models.DecimalField(max_digits=10, decimal_places=2, null=False)
-#     created_at = models.DateTimeField(auto_now_add=True)
-#     updated_at = models.DateTimeField(auto_now=True)
+class OrderItem(models.Model):
+    order = models.ForeignKey(Order, models.CASCADE, db_column='order_id')
+    cart_item = models.ForeignKey(CartItem, models.CASCADE, db_column='cart_item_id')
+    total = models.DecimalField(max_digits=10, decimal_places=2, null=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
