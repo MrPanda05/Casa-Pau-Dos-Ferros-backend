@@ -213,3 +213,17 @@ def getProductInCart(request):
     for i in range(len(data)):
         data[i]["quantity"] = cart_item[i].quantity
     return Response(data, status=200)
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def getOrder(request):
+    carts = Cart.objects.filter(user_id=request.user, is_active=False)
+    orders = []
+    for cart in carts:
+        order = Order.objects.filter(cart=cart).first()
+        if order:
+            orders.append(order)
+    if not orders:
+        return Response({"message": "Nenhuma compra encontrada"}, status=404)
+    serializer = OrderSerializer(orders, many=True)
+    return Response(serializer.data, status=200)
