@@ -14,5 +14,6 @@ urlpatterns = [
     path("product/<int:category>", productByCategory),
     path("confirm/", confirmCart),
     path("cart/", getProductInCart),
-    path("order/", getOrder)
+    path("order/", getOrder),
+    path("devolution/", orderDevolution),
 ]

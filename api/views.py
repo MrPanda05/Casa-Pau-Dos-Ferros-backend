@@ -227,3 +227,21 @@ def getOrder(request):
         return Response({"message": "Nenhuma compra encontrada"}, status=404)
     serializer = OrderSerializer(orders, many=True)
     return Response(serializer.data, status=200)
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def orderDevolution(request):
+    order = get_object_or_404(Order, order_id=request.data["order_id"])
+    cart = get_object_or_404(Cart, order=order, user_id=request.user)
+    if not cart:
+        return Response({"message": "Compra não encontrada"}, status=404)
+    cart_items = CartItem.objects.filter(cart=cart)
+    if order.status == Order.Status.Finished:
+        for item in cart_items:
+            item.product.amount += item.quantity
+            item.product.save()
+        cart.status = Cart.Status.Canceled
+        order.status = Order.Status.Canceled
+        order.save()
+        return Response({"message": "Devolução realizada"}, status=200)
+    return Response({"message": "Devolução não permitida"}, status=400)
