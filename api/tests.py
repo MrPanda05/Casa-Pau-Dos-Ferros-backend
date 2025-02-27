@@ -8,7 +8,7 @@ factory = APIRequestFactory()
 # user = User.objects.get(username="test")
 view_cart = CartViewSet.as_view({'get': 'list', 'post': 'create'})
 view_prd = ProductViewSet.as_view({'get': 'list', 'post': 'create'})
-class TestHelloWorld(TestCase):
+class Test(TestCase):
 
     def testConfirmCart(self):
         # Criar usuário para o teste
