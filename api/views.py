@@ -50,7 +50,9 @@ Returns:
 def user_login(request):
     login = request.data["login"]
     if "@" in login:
-        userEmail = get_object_or_404(User, email=login)
+        userEmail = User.objects.filter(email=login).first()
+        if userEmail is None:
+            return Response({"message": "Credenciais inválidas"}, status=400)
         user = authenticate(username=userEmail.username, password=request.data["password"])
     else:
         user = authenticate(username=login, password=request.data["password"])
@@ -164,10 +166,14 @@ def productByCategory(request, category):
 def confirmCart(request):
     # Verificar endereço do usuário
     print("verificando endereço")
-    address = get_object_or_404(user_address, user_id=request.user, address_id=request.data["user_address"])
+    address = user_address.objects.filter(user_id=request.user, address_id=request.data["user_address"]).first()
+    if address is None:
+        return Response({"message": "Endereço não encontrado"}, status=400)
     if not address:
         return Response({"message": "Endereço não encontrado"}, status=400)
-    cart = get_object_or_404(Cart, user_id=request.user, is_active=True)
+    cart = Cart.objects.filter(user_id=request.user, is_active=True).first()
+    if cart is None:
+        return Response({"message": "Carrinho não encontrado"}, status=400)
     cart.is_active = False
     cart.status = Cart.Status.Confirmed
     order = Order.objects.filter(cart=cart).first()
@@ -180,7 +186,9 @@ def confirmCart(request):
         if not serializer.is_valid():
             return Response(serializer.errors, status=400)
         serializer.save()
-        order = get_object_or_404(Order, cart=cart)
+        order = Order.objects.filter(cart=cart).first()
+        if order is None:
+            return Response({"message": "Compra não encontrada"}, status=404)
     items = []
     for item in cart_item:
         item_data = dict(order=order.order_id, cart_item=item.id, total=(item.quantity*item.product.price))
@@ -203,7 +211,9 @@ def confirmCart(request):
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def getProductInCart(request):
-    cart = get_object_or_404(Cart, user_id=request.user, is_active=True)
+    cart = Cart.objects.filter(user_id=request.user, is_active=True).first()
+    if cart is None:
+        return Response({"message": "Carrinho não encontrado"}, status=404)
     cart_item = CartItem.objects.filter(cart=cart)
     products = []
     for item in cart_item:
@@ -213,3 +223,39 @@ def getProductInCart(request):
     for i in range(len(data)):
         data[i]["quantity"] = cart_item[i].quantity
     return Response(data, status=200)
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def getOrder(request):
+    carts = Cart.objects.filter(user_id=request.user, is_active=False)
+    orders = []
+    for cart in carts:
+        order = Order.objects.filter(cart=cart).first()
+        if order:
+            orders.append(order)
+    if not orders:
+        return Response({"message": "Nenhuma compra encontrada"}, status=404)
+    serializer = OrderSerializer(orders, many=True)
+    return Response(serializer.data, status=200)
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def orderDevolution(request):
+    order = Order.objects.filter(order_id=request.data["order_id"]).first()
+    if order is None:
+        return Response({"message": "Compra não encontrada"}, status=404)
+    cart = Cart.objects.filter(user_id=request.user, is_active=False).first()
+    if cart is None:
+        return Response({"message": "Carrinho não encontrado"}, status=404)
+    if not cart:
+        return Response({"message": "Compra não encontrada"}, status=404)
+    cart_items = CartItem.objects.filter(cart=cart)
+    if order.status == Order.Status.Finished:
+        for item in cart_items:
+            item.product.amount += item.quantity
+            item.product.save()
+        cart.status = Cart.Status.Canceled
+        order.status = Order.Status.Canceled
+        order.save()
+        return Response({"message": "Devolução realizada"}, status=200)
+    return Response({"message": "Devolução não permitida"}, status=400)
